@@ -30,6 +30,12 @@ def get_frame_jumping(row, col, width, height):
     if col * width + width > sheet_width or row * height + height > sheet_height:
         return None  
     return sprite_sheet1.subsurface(pygame.Rect(col * width, row * height, width, height))
+# Extract frames from jumping sprite sheet for left direction
+def get_frame_jumping_left(row, col, width, height):
+    sheet_width, sheet_height = sprite_sheet1.get_size()
+    if col * width + width > sheet_width or row * height + height > sheet_height:
+        return None  
+    return sprite_sheet1.subsurface(pygame.Rect(col * width, row * height, width, height))
 
 # Running Animations
 SPRITE_WIDTH, SPRITE_HEIGHT = 265, 300  
@@ -41,6 +47,10 @@ running_left_frames = [get_frame_Running(1, i, SPRITE_WIDTH, SPRITE_HEIGHT) for 
 SPRITE_WIDTH_JUMPING, SPRITE_HEIGHT_JUMPING = 192, 300
 jump_frames = [get_frame_jumping(0, i, SPRITE_WIDTH_JUMPING, SPRITE_HEIGHT_JUMPING) for i in range(6)]
 jump_frames = [frame for frame in jump_frames if frame is not None]
+
+# Jumping Animations for left direction
+jump_left_frames = [get_frame_jumping_left(1, i, SPRITE_WIDTH_JUMPING, SPRITE_HEIGHT_JUMPING) for i in range(6)]
+jump_left_frames = [frame for frame in jump_left_frames if frame is not None]
 
 
 # Player properties
@@ -103,13 +113,16 @@ while running:
         playerX = 0
     elif playerX > screen.get_width() - SPRITE_WIDTH:  # Ensure boundary check for running frames
         playerX = screen.get_width() - SPRITE_WIDTH
-
-    # Animation logic with smooth transition and slower jump loop speed (60% of running speed)
+        
+        # Animation logic with smooth transition and slower jump loop speed (60% of running speed)
     if is_jumping:
         frame_counter += 1
         if frame_counter % int(10 / 1) == 0:  # Slower jump loop speed (60% of running speed)
             frame_index = (frame_index + 1) % len(jump_frames)  # Ensure frame_index is within range
-        current_frame = jump_frames[frame_index]
+        if playerX_change < 0:  # Jumping to the left
+            current_frame = jump_left_frames[frame_index]
+        else:  # Jumping to the right or straight up
+            current_frame = jump_frames[frame_index]
     elif playerX_change > 0:  # Moving Right
         frame_counter += 1
         if frame_counter % 10 == 0:
