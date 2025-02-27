@@ -1,5 +1,5 @@
 import pygame
-from sprite_utils import get_frame_Stance, get_frame_Running, get_frame_Duck_Up, get_frame_Jump_Directional, get_frame_Jump_Vertical
+from sprite_utils import get_frame_Stance, get_frame_Running, get_frame_Duck_Up, get_frame_Jump_Directional, get_frame_Jump_Vertical, get_frame_Double_Punch, get_frame_Punch, get_frame_Kick
 
 # Load the sprite sheets
 sprite_sheet = pygame.image.load('Scorpian/last.png')
@@ -7,6 +7,9 @@ sprite_sheet2 = pygame.image.load('Scorpian/Srunning.png')
 sprite_sheet3 = pygame.image.load('Scorpian/duck&up.png')
 sprite_sheet4 = pygame.image.load('Scorpian/jumpfront3.png')
 sprite_sheet5 = pygame.image.load('Scorpian/jump.png')
+sprite_sheet6 = pygame.image.load('Scorpian/Dpunch.png')
+sprite_sheet7 = pygame.image.load('Scorpian/punch.png')
+sprite_sheet8 = pygame.image.load('Scorpian/bBkick.png')
 
 class MainCharacter:
     SPRITE_WIDTH, SPRITE_HEIGHT = 167, 290  # Width and height of the character sprite
@@ -16,6 +19,9 @@ class MainCharacter:
     SPRITE_WIDTH_UP, SPRITE_HEIGHT_UP = 132, 290  # Width and height of the up sprite
     SPRITE_WIDTH_JUMP_DIRECTIONAL, SPRITE_HEIGHT_JUMP_DIRECTIONAL = 132, 290  # Width and height of the directional jump sprite
     SPRITE_WIDTH_JUMP_VERTICAL, SPRITE_HEIGHT_JUMP_VERTICAL = 132, 290  # Width and height of the vertical jump sprite
+    SPRITE_WIDTH_DOUBLE_PUNCH, SPRITE_HEIGHT_DOUBLE_PUNCH = 183, 290  # Width and height of the double punch sprite
+    SPRITE_WIDTH_PUNCH, SPRITE_HEIGHT_PUNCH = 183, 290  # Width and height of the punch sprite
+    SPRITE_WIDTH_KICK, SPRITE_HEIGHT_KICK = 185, 290  # Width and height of the kick sprite
 
     def __init__(self, x, y):
         self.x = x  # Character's x position
@@ -25,9 +31,13 @@ class MainCharacter:
         self.is_getting_up = False  # Flag to check if the character is getting up
         self.is_jumping_directional = False  # Flag to check if the character is performing a directional jump
         self.is_jumping_vertical = False  # Flag to check if the character is performing a vertical jump
+        self.is_double_punching = False  # Flag to check if the character is performing a double punch
+        self.is_punching = False  # Flag to check if the character is performing a punch
+        self.is_kicking = False  # Flag to check if the character is performing a kick
         self.current_frame = get_frame_Stance(sprite_sheet, 0, 0, self.SPRITE_WIDTH, self.SPRITE_HEIGHT)  # Initial frame
         self.frame_index = 0  # Index of the current frame
         self.frame_counter = 0  # Counter for frame updates
+        self.last_a_press_time = 0  # Time of the last 'A' key press
 
         # Load stance frames
         self.stance_frames = [get_frame_Stance(sprite_sheet, 0, i, self.SPRITE_WIDTH_STANCE, self.SPRITE_HEIGHT_STANCE) for i in range(4)]
@@ -54,6 +64,18 @@ class MainCharacter:
         # Load vertical jump frames
         self.jump_vertical_frames = [get_frame_Jump_Vertical(sprite_sheet5, 0, i, self.SPRITE_WIDTH_JUMP_VERTICAL, self.SPRITE_HEIGHT_JUMP_VERTICAL) for i in range(3)]
         self.jump_vertical_frames = [frame for frame in self.jump_vertical_frames if frame is not None]
+
+        # Load double punch frames
+        self.double_punch_frames = [get_frame_Double_Punch(sprite_sheet6, 0, i, self.SPRITE_WIDTH_DOUBLE_PUNCH, self.SPRITE_HEIGHT_DOUBLE_PUNCH) for i in range(6)]
+        self.double_punch_frames = [frame for frame in self.double_punch_frames if frame is not None]
+
+        # Load punch frames
+        self.punch_frames = [get_frame_Punch(sprite_sheet7, 0, i, self.SPRITE_WIDTH_PUNCH, self.SPRITE_HEIGHT_PUNCH) for i in range(3)]
+        self.punch_frames = [frame for frame in self.punch_frames if frame is not None]
+
+        # Load kick frames
+        self.kick_frames = [get_frame_Kick(sprite_sheet8, 0, i, self.SPRITE_WIDTH_KICK, self.SPRITE_HEIGHT_KICK) for i in range(8)]
+        self.kick_frames = [frame for frame in self.kick_frames if frame is not None]
 
     def update_position(self):
         # Update x position
@@ -98,8 +120,29 @@ class MainCharacter:
                     self.frame_index = 0
                     self.is_jumping_vertical = False  # Stop jumping after one loop
             self.current_frame = self.jump_vertical_frames[self.frame_index]
-        elif self.x_change > 0:  # Running right
+        elif self.is_double_punching:  # Double Punching
             if self.frame_counter % 8 == 0:
+                self.frame_index = (self.frame_index + 1)
+                if self.frame_index >= len(self.double_punch_frames):
+                    self.frame_index = 0
+                    self.is_double_punching = False  # Stop double punching after one loop
+            self.current_frame = self.double_punch_frames[self.frame_index]
+        elif self.is_punching:  # Punching
+            if self.frame_counter % 8 == 0:
+                self.frame_index = (self.frame_index + 1)
+                if self.frame_index >= len(self.punch_frames):
+                    self.frame_index = 0
+                    self.is_punching = False  # Stop punching after one loop
+            self.current_frame = self.punch_frames[self.frame_index]
+        elif self.is_kicking:  # Kicking
+            if self.frame_counter % 5 == 0:
+                self.frame_index = (self.frame_index + 1)
+                if self.frame_index >= len(self.kick_frames):
+                    self.frame_index = 0
+                    self.is_kicking = False  # Stop kicking after one loop
+            self.current_frame = self.kick_frames[self.frame_index]
+        elif self.x_change > 0:  # Running right
+            if self.frame_counter % 7 == 0:
                 self.frame_index = (self.frame_index + 1) % len(self.running_frames)
             self.current_frame = self.running_frames[self.frame_index]
         elif self.x_change < 0:  # Running left
