@@ -26,11 +26,12 @@ sprite_sheet5 = pygame.image.load('Scorpian/jump.png')
 sprite_sheet6 = pygame.image.load('Scorpian/Dpunch.png')
 sprite_sheet7 = pygame.image.load('Scorpian/punch.png')
 sprite_sheet8 = pygame.image.load('Scorpian/bBkick.png')
+sprite_sheet9 = pygame.image.load('Scorpian/Undkick.png')
 
 # Game loop
 running = True
 clock = pygame.time.Clock()
-player = MainCharacter(370, 345) # Initialize the main character
+player = MainCharacter(370, 350)
 villain = Villain(800, 350)  # Initialize the villain at a different position
 
 while running:
@@ -40,38 +41,46 @@ while running:
     keys = pygame.key.get_pressed()
     current_time = pygame.time.get_ticks()
 
-    if keys[pygame.K_UP]:
-        player.last_up_press_time = current_time
+    if keys[pygame.K_DOWN]:
+        player.last_down_press_time = current_time
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                player.x_change = -3
-            if event.key == pygame.K_RIGHT:
-                player.x_change = 3
-            if event.key == pygame.K_DOWN:
-                player.is_ducking = True
-                player.is_getting_up = False
-                player.frame_index = 0
-            if event.key == pygame.K_UP:
-                if player.x_change != 0:  # Directional jump
-                    player.is_jumping_directional = True
-                else:  # Vertical jump
-                    player.is_jumping_vertical = True
-                player.frame_index = 0
-            if event.key == pygame.K_a:
-                if current_time - player.last_a_press_time < 500:  # Double press within 500ms
-                    player.is_double_punching = True
+            if not player.is_movement_in_progress:  # Check if a movement loop is in progress
+                if event.key == pygame.K_LEFT:
+                    player.x_change = -3
+                if event.key == pygame.K_RIGHT:
+                    player.x_change = 3
+                if event.key == pygame.K_DOWN:
+                    player.is_ducking = True
+                    player.is_getting_up = False
                     player.frame_index = 0
-                else:
-                    player.is_punching = True
+                if event.key == pygame.K_UP:
+                    if player.x_change != 0:  # Directional jump
+                        player.is_jumping_directional = True
+                    else:  # Vertical jump
+                        player.is_jumping_vertical = True
                     player.frame_index = 0
-                player.last_a_press_time = current_time
-            if event.key == pygame.K_d:
-                player.is_kicking = True
-                player.frame_index = 0
+                    player.is_movement_in_progress = True  # Movement loop started
+                if event.key == pygame.K_a:
+                    if current_time - player.last_a_press_time < 500:  # Double press within 500ms
+                        player.is_double_punching = True
+                        player.frame_index = 0
+                    else:
+                        player.is_punching = True
+                        player.frame_index = 0
+                    player.last_a_press_time = current_time
+                    player.is_movement_in_progress = True  # Movement loop started
+                if event.key == pygame.K_d:
+                    if current_time - player.last_down_press_time < 400 and keys[pygame.K_DOWN]:
+                        player.is_und_kicking = True
+                        player.frame_index = 0
+                    else:
+                        player.is_kicking = True
+                        player.frame_index = 0
+                    player.is_movement_in_progress = True  # Movement loop started
             
         if event.type == pygame.KEYUP:
             if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
@@ -82,12 +91,17 @@ while running:
                 player.frame_index = 0
 
     player.update_position()
-    player.update_frame()
+    player.update_frame(villain.x)
     player.draw()
 
     villain.update_position(player.x)  # Update villain's position towards the main character
     villain.update_frame(player.x)  # Pass the main character's x position to update_frame
     villain.draw()
+
+    # Collision detection
+    if player.is_punching and player.get_rect().colliderect(villain.get_rect()):
+        villain.is_hit = True
+        villain.frame_index = 0
 
     pygame.display.update()
     clock.tick(60)

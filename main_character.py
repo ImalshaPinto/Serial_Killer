@@ -1,5 +1,5 @@
 import pygame
-from sprite_utils import get_frame_Stance, get_frame_Running, get_frame_Duck_Up, get_frame_Jump_Directional, get_frame_Jump_Vertical, get_frame_Double_Punch, get_frame_Punch, get_frame_Kick
+from sprite_utils import get_frame_Stance, get_frame_Running, get_frame_Duck_Up, get_frame_Jump_Directional, get_frame_Jump_Vertical, get_frame_Double_Punch, get_frame_Punch, get_frame_Kick, get_frame_Underkick
 
 # Load the sprite sheets
 sprite_sheet = pygame.image.load('Scorpian/last.png')
@@ -10,6 +10,7 @@ sprite_sheet5 = pygame.image.load('Scorpian/jump.png')
 sprite_sheet6 = pygame.image.load('Scorpian/Dpunch.png')
 sprite_sheet7 = pygame.image.load('Scorpian/punch.png')
 sprite_sheet8 = pygame.image.load('Scorpian/bBkick.png')
+sprite_sheet9 = pygame.image.load('Scorpian/Undkick.png')
 
 class MainCharacter:
     SPRITE_WIDTH, SPRITE_HEIGHT = 167, 290  # Width and height of the character sprite
@@ -22,6 +23,7 @@ class MainCharacter:
     SPRITE_WIDTH_DOUBLE_PUNCH, SPRITE_HEIGHT_DOUBLE_PUNCH = 183, 290  # Width and height of the double punch sprite
     SPRITE_WIDTH_PUNCH, SPRITE_HEIGHT_PUNCH = 183, 290  # Width and height of the punch sprite
     SPRITE_WIDTH_KICK, SPRITE_HEIGHT_KICK = 185, 290  # Width and height of the kick sprite
+    SPRITE_WIDTH_UNDERKICK, SPRITE_HEIGHT_UNDERKICK = 185, 290  # Width and height of the underkick sprite
 
     def __init__(self, x, y):
         self.x = x  # Character's x position
@@ -34,10 +36,13 @@ class MainCharacter:
         self.is_double_punching = False  # Flag to check if the character is performing a double punch
         self.is_punching = False  # Flag to check if the character is performing a punch
         self.is_kicking = False  # Flag to check if the character is performing a kick
+        self.is_und_kicking = False  # Flag to check if the character is performing an underkick
         self.current_frame = get_frame_Stance(sprite_sheet, 0, 0, self.SPRITE_WIDTH, self.SPRITE_HEIGHT)  # Initial frame
         self.frame_index = 0  # Index of the current frame
         self.frame_counter = 0  # Counter for frame updates
         self.last_a_press_time = 0  # Time of the last 'A' key press
+        self.last_down_press_time = 0  # Time of the last 'DOWN' key press
+        self.is_movement_in_progress = False  # Flag to indicate if a movement loop is in progress
 
         # Load stance frames
         self.stance_frames = [get_frame_Stance(sprite_sheet, 0, i, self.SPRITE_WIDTH_STANCE, self.SPRITE_HEIGHT_STANCE) for i in range(4)]
@@ -77,6 +82,10 @@ class MainCharacter:
         self.kick_frames = [get_frame_Kick(sprite_sheet8, 0, i, self.SPRITE_WIDTH_KICK, self.SPRITE_HEIGHT_KICK) for i in range(8)]
         self.kick_frames = [frame for frame in self.kick_frames if frame is not None]
 
+        # Load underkick frames
+        self.und_kick_frames_left = [get_frame_Underkick(sprite_sheet9, 0, i, self.SPRITE_WIDTH_UNDERKICK, self.SPRITE_HEIGHT_UNDERKICK) for i in range(8)]
+        self.und_kick_frames_right = [get_frame_Underkick(sprite_sheet9, 1, i, self.SPRITE_WIDTH_UNDERKICK, self.SPRITE_HEIGHT_UNDERKICK) for i in range(8)]
+
     def update_position(self):
         # Update x position
         self.x += self.x_change
@@ -87,7 +96,7 @@ class MainCharacter:
         elif self.x > pygame.display.get_surface().get_width() - self.SPRITE_WIDTH:
             self.x = pygame.display.get_surface().get_width() - self.SPRITE_WIDTH
 
-    def update_frame(self):
+    def update_frame(self, target_x):
         # Update frames based on movement
         self.frame_counter += 1
         if self.is_ducking:  # Ducking
@@ -109,6 +118,7 @@ class MainCharacter:
                 if self.frame_index >= len(self.jump_right_frames):
                     self.frame_index = 0
                     self.is_jumping_directional = False  # Stop jumping after one loop
+                    self.is_movement_in_progress = False  # Movement loop finished
             if self.x_change > 0:
                 self.current_frame = self.jump_right_frames[self.frame_index]
             elif self.x_change < 0:
@@ -119,6 +129,7 @@ class MainCharacter:
                 if self.frame_index >= len(self.jump_vertical_frames):
                     self.frame_index = 0
                     self.is_jumping_vertical = False  # Stop jumping after one loop
+                    self.is_movement_in_progress = False  # Movement loop finished
             self.current_frame = self.jump_vertical_frames[self.frame_index]
         elif self.is_double_punching:  # Double Punching
             if self.frame_counter % 8 == 0:
@@ -126,6 +137,7 @@ class MainCharacter:
                 if self.frame_index >= len(self.double_punch_frames):
                     self.frame_index = 0
                     self.is_double_punching = False  # Stop double punching after one loop
+                    self.is_movement_in_progress = False  # Movement loop finished
             self.current_frame = self.double_punch_frames[self.frame_index]
         elif self.is_punching:  # Punching
             if self.frame_counter % 8 == 0:
@@ -133,6 +145,7 @@ class MainCharacter:
                 if self.frame_index >= len(self.punch_frames):
                     self.frame_index = 0
                     self.is_punching = False  # Stop punching after one loop
+                    self.is_movement_in_progress = False  # Movement loop finished
             self.current_frame = self.punch_frames[self.frame_index]
         elif self.is_kicking:  # Kicking
             if self.frame_counter % 5 == 0:
@@ -140,7 +153,19 @@ class MainCharacter:
                 if self.frame_index >= len(self.kick_frames):
                     self.frame_index = 0
                     self.is_kicking = False  # Stop kicking after one loop
+                    self.is_movement_in_progress = False  # Movement loop finished
             self.current_frame = self.kick_frames[self.frame_index]
+        elif self.is_und_kicking:  # Underkicking
+            if self.frame_counter % 5 == 0:
+                self.frame_index = (self.frame_index + 1)
+                if self.frame_index >= len(self.und_kick_frames_left):
+                    self.frame_index = 0
+                    self.is_und_kicking = False  # Stop underkicking after one loop
+                    self.is_movement_in_progress = False  # Movement loop finished
+            if self.x < target_x:
+                self.current_frame = self.und_kick_frames_left[self.frame_index]
+            else:
+                self.current_frame = self.und_kick_frames_right[self.frame_index]
         elif self.x_change > 0:  # Running right
             if self.frame_counter % 7 == 0:
                 self.frame_index = (self.frame_index + 1) % len(self.running_frames)
@@ -156,3 +181,6 @@ class MainCharacter:
 
     def draw(self):
         pygame.display.get_surface().blit(self.current_frame, (self.x, self.y))  # Draw the current frame on the screen
+
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, self.SPRITE_WIDTH, self.SPRITE_HEIGHT)
