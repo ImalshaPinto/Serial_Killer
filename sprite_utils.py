@@ -83,3 +83,17 @@ def get_frame_Hit(sprite_sheet, row, col, width, height):
     if col * width + width > sheet_width or row * height + height > sheet_height:
         raise ValueError("Frame dimensions exceed sprite sheet dimensions")
     return sprite_sheet.subsurface(pygame.Rect(col * width, row * height, width, height))
+
+# Extract frames from FallingDown sprite sheet
+def get_frame_FallingDown(sprite_sheet, row, col, width, height):
+    sheet_width, sheet_height = sprite_sheet.get_size()
+    if col * width + width > sheet_width or row * height + height > sheet_height:
+        raise ValueError("Frame dimensions exceed sprite sheet dimensions")
+    return sprite_sheet.subsurface(pygame.Rect(col * width, row * height, width, height))
+
+# Extract frames from getup sprite sheet
+def get_frame_GetUp(sprite_sheet, row, col, width, height):
+    sheet_width, sheet_height = sprite_sheet.get_size()
+    if col * width + width > sheet_width or row * height + height > sheet_height:
+        raise ValueError("Frame dimensions exceed sprite sheet here dimensions")
+    return sprite_sheet.subsurface(pygame.Rect(col * width, row * height, width, height))

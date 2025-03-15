@@ -18,7 +18,7 @@ background = pygame.image.load('palacegrounds.png')
 background = pygame.transform.scale(background, (1250, 700))
 
 # Load the sprite sheet
-sprite_sheet = pygame.image.load('Scorpian/last.png')
+sprite_sheet = pygame.image.load('Scorpian/Sstance1.png')
 sprite_sheet2 = pygame.image.load('Scorpian/Srunning.png')
 sprite_sheet3 = pygame.image.load('Scorpian/duck&up.png')
 sprite_sheet4 = pygame.image.load('Scorpian/jumpfront3.png')
@@ -33,6 +33,9 @@ running = True
 clock = pygame.time.Clock()
 player = MainCharacter(370, 350)
 villain = Villain(800, 350)  # Initialize the villain at a different position
+
+# Set a timer event to change behavior every 2 seconds
+pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
 
 while running:
     screen.fill((0, 0, 0))
@@ -90,18 +93,39 @@ while running:
                 player.is_getting_up = True
                 player.frame_index = 0
 
+        if event.type == pygame.USEREVENT + 1:
+            villain.random_behavior()
+        
+        if event.type == pygame.USEREVENT + 2:
+            villain.state = "HOLD_FALLING_DOWN"
+            pygame.time.set_timer(pygame.USEREVENT + 2, 0)
+
     player.update_position()
     player.update_frame(villain.x)
     player.draw()
 
     villain.update_position(player.x)  # Update villain's position towards the main character
     villain.update_frame(player.x)  # Pass the main character's x position to update_frame
-    villain.draw()
+    villain.draw(screen)
 
     # Collision detection
+    if player.is_kicking and player.get_rect().colliderect(villain.get_rect()):
+        if not villain.is_falling_down:  # Check if the villain is already falling down
+            villain.is_falling_down = True
+            villain.is_hit = False  # Reset the hit flag if necessary
+            villain.frame_index = 0
     if player.is_punching and player.get_rect().colliderect(villain.get_rect()):
-        villain.is_hit = True
-        villain.frame_index = 0
+        if not villain.is_hit:  # Check if the villain is already falling down
+            villain.is_hit = True
+            villain.frame_index = 0
+    if player.is_double_punching and player.get_rect().colliderect(villain.get_rect()):
+        if not villain.is_hit:  # Check if the villain is already falling down
+            villain.is_hit = True
+            villain.frame_index = 0
+    if player.is_jumping_vertical and player.get_rect().colliderect(villain.get_rect()):
+        if not villain.is_hit:  # Check if the villain is already falling down
+            villain.is_hit = True
+            villain.frame_index = 0
 
     pygame.display.update()
     clock.tick(60)

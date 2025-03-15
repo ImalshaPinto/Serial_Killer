@@ -2,7 +2,7 @@ import pygame
 from sprite_utils import get_frame_Stance, get_frame_Running, get_frame_Duck_Up, get_frame_Jump_Directional, get_frame_Jump_Vertical, get_frame_Double_Punch, get_frame_Punch, get_frame_Kick, get_frame_Underkick
 
 # Load the sprite sheets
-sprite_sheet = pygame.image.load('Scorpian/last.png')
+sprite_sheet = pygame.image.load('Scorpian/Sstance1.png')
 sprite_sheet2 = pygame.image.load('Scorpian/Srunning.png')
 sprite_sheet3 = pygame.image.load('Scorpian/duck&up.png')
 sprite_sheet4 = pygame.image.load('Scorpian/jumpfront3.png')
@@ -14,7 +14,7 @@ sprite_sheet9 = pygame.image.load('Scorpian/Undkick.png')
 
 class MainCharacter:
     SPRITE_WIDTH, SPRITE_HEIGHT = 167, 290  # Width and height of the character sprite
-    SPRITE_WIDTH_STANCE, SPRITE_HEIGHT_STANCE = 167, 290  # Width and height of the stance sprite
+    SPRITE_WIDTH_STANCE, SPRITE_HEIGHT_STANCE = 133, 290  # Width and height of the stance sprite
     SPRITE_WIDTH_RUNNING, SPRITE_HEIGHT_RUNNING = 132, 300  # Width and height of the running sprite
     SPRITE_WIDTH_DUCK, SPRITE_HEIGHT_DUCK = 132, 290  # Width and height of the duck sprite
     SPRITE_WIDTH_UP, SPRITE_HEIGHT_UP = 132, 290  # Width and height of the up sprite
@@ -45,20 +45,28 @@ class MainCharacter:
         self.is_movement_in_progress = False  # Flag to indicate if a movement loop is in progress
 
         # Load stance frames
-        self.stance_frames = [get_frame_Stance(sprite_sheet, 0, i, self.SPRITE_WIDTH_STANCE, self.SPRITE_HEIGHT_STANCE) for i in range(4)]
-        self.stance_frames = [frame for frame in self.stance_frames if frame is not None]
+        self.stance_frames_left = [get_frame_Stance(sprite_sheet, 0, i, self.SPRITE_WIDTH_STANCE, self.SPRITE_HEIGHT_STANCE) for i in range(8)]
+        self.stance_frames_right = [get_frame_Stance(sprite_sheet, 1, i, self.SPRITE_WIDTH_STANCE, self.SPRITE_HEIGHT_STANCE) for i in range(8)]
+        self.stance_frames_left = [frame for frame in self.stance_frames_left if frame is not None]
+        self.stance_frames_right = [frame for frame in self.stance_frames_right if frame is not None]
 
         # Load running frames
-        self.running_frames = [get_frame_Running(sprite_sheet2, 0, i, self.SPRITE_WIDTH_RUNNING, self.SPRITE_HEIGHT_RUNNING) for i in range(12)]
-        self.running_frames = [frame for frame in self.running_frames if frame is not None]
+        self.running_frames_left = [get_frame_Running(sprite_sheet2, 1, i, self.SPRITE_WIDTH_RUNNING, self.SPRITE_HEIGHT_RUNNING) for i in range(12)]
+        self.running_frames_right = [get_frame_Running(sprite_sheet2, 0, i, self.SPRITE_WIDTH_RUNNING, self.SPRITE_HEIGHT_RUNNING) for i in range(12)]
+        self.running_frames_left = [frame for frame in self.running_frames_left if frame is not None]
+        self.running_frames_right = [frame for frame in self.running_frames_right if frame is not None]
 
         # Load duck frames
-        self.duck_frames = [get_frame_Duck_Up(sprite_sheet3, 0, i, self.SPRITE_WIDTH_DUCK, self.SPRITE_HEIGHT_DUCK) for i in range(3)]
-        self.duck_frames = [frame for frame in self.duck_frames if frame is not None]
+        self.duck_frames_left = [get_frame_Duck_Up(sprite_sheet3, 0, i, self.SPRITE_WIDTH_DUCK, self.SPRITE_HEIGHT_DUCK) for i in range(3)]
+        self.duck_frames_right = [get_frame_Duck_Up(sprite_sheet3, 1, i, self.SPRITE_WIDTH_DUCK, self.SPRITE_HEIGHT_DUCK) for i in range(3)]
+        self.duck_frames_left = [frame for frame in self.duck_frames_left if frame is not None]
+        self.duck_frames_right = [frame for frame in self.duck_frames_right if frame is not None]
 
         # Load up frames
-        self.up_frames = [get_frame_Duck_Up(sprite_sheet3, 1, i, self.SPRITE_WIDTH_UP, self.SPRITE_HEIGHT_UP) for i in range(3)]
-        self.up_frames = [frame for frame in self.up_frames if frame is not None]
+        self.up_frames_left = [get_frame_Duck_Up(sprite_sheet3, 0, i, self.SPRITE_WIDTH_UP, self.SPRITE_HEIGHT_UP) for i in range(3)]
+        self.up_frames_right = [get_frame_Duck_Up(sprite_sheet3, 1, i, self.SPRITE_WIDTH_UP, self.SPRITE_HEIGHT_UP) for i in range(3)]
+        self.up_frames_left = [frame for frame in self.up_frames_left if frame is not None]
+        self.up_frames_right = [frame for frame in self.up_frames_right if frame is not None]
 
         # Load directional jump frames
         self.jump_right_frames = [get_frame_Jump_Directional(sprite_sheet4, 0, i, self.SPRITE_WIDTH_JUMP_DIRECTIONAL, self.SPRITE_HEIGHT_JUMP_DIRECTIONAL) for i in range(9)]
@@ -67,24 +75,34 @@ class MainCharacter:
         self.jump_left_frames = [frame for frame in self.jump_left_frames if frame is not None]
 
         # Load vertical jump frames
-        self.jump_vertical_frames = [get_frame_Jump_Vertical(sprite_sheet5, 0, i, self.SPRITE_WIDTH_JUMP_VERTICAL, self.SPRITE_HEIGHT_JUMP_VERTICAL) for i in range(3)]
-        self.jump_vertical_frames = [frame for frame in self.jump_vertical_frames if frame is not None]
+        self.jump_vertical_frames_left = [get_frame_Jump_Vertical(sprite_sheet5, 0, i, self.SPRITE_WIDTH_JUMP_VERTICAL, self.SPRITE_HEIGHT_JUMP_VERTICAL) for i in range(3)]
+        self.jump_vertical_frames_right = [get_frame_Jump_Vertical(sprite_sheet5, 1, i, self.SPRITE_WIDTH_JUMP_VERTICAL, self.SPRITE_HEIGHT_JUMP_VERTICAL) for i in range(3)]
+        self.jump_vertical_frames_left = [frame for frame in self.jump_vertical_frames_left if frame is not None]
+        self.jump_vertical_frames_right = [frame for frame in self.jump_vertical_frames_right if frame is not None]
 
         # Load double punch frames
-        self.double_punch_frames = [get_frame_Double_Punch(sprite_sheet6, 0, i, self.SPRITE_WIDTH_DOUBLE_PUNCH, self.SPRITE_HEIGHT_DOUBLE_PUNCH) for i in range(6)]
-        self.double_punch_frames = [frame for frame in self.double_punch_frames if frame is not None]
+        self.double_punch_frames_left = [get_frame_Double_Punch(sprite_sheet6, 0, i, self.SPRITE_WIDTH_DOUBLE_PUNCH, self.SPRITE_HEIGHT_DOUBLE_PUNCH) for i in range(6)]
+        self.double_punch_frames_right = [get_frame_Double_Punch(sprite_sheet6, 1, i, self.SPRITE_WIDTH_DOUBLE_PUNCH, self.SPRITE_HEIGHT_DOUBLE_PUNCH) for i in range(6)]
+        self.double_punch_frames_left = [frame for frame in self.double_punch_frames_left if frame is not None]
+        self.double_punch_frames_right = [frame for frame in self.double_punch_frames_right if frame is not None]
 
         # Load punch frames
-        self.punch_frames = [get_frame_Punch(sprite_sheet7, 0, i, self.SPRITE_WIDTH_PUNCH, self.SPRITE_HEIGHT_PUNCH) for i in range(3)]
-        self.punch_frames = [frame for frame in self.punch_frames if frame is not None]
+        self.punch_frames_left = [get_frame_Punch(sprite_sheet7, 0, i, self.SPRITE_WIDTH_PUNCH, self.SPRITE_HEIGHT_PUNCH) for i in range(3)]
+        self.punch_frames_right = [get_frame_Punch(sprite_sheet7, 1, i, self.SPRITE_WIDTH_PUNCH, self.SPRITE_HEIGHT_PUNCH) for i in range(3)]
+        self.punch_frames_left = [frame for frame in self.punch_frames_left if frame is not None]
+        self.punch_frames_right = [frame for frame in self.punch_frames_right if frame is not None]
 
         # Load kick frames
-        self.kick_frames = [get_frame_Kick(sprite_sheet8, 0, i, self.SPRITE_WIDTH_KICK, self.SPRITE_HEIGHT_KICK) for i in range(8)]
-        self.kick_frames = [frame for frame in self.kick_frames if frame is not None]
+        self.kick_frames_left = [get_frame_Kick(sprite_sheet8, 0, i, self.SPRITE_WIDTH_KICK, self.SPRITE_HEIGHT_KICK) for i in range(8)]
+        self.kick_frames_right = [get_frame_Kick(sprite_sheet8, 1, i, self.SPRITE_WIDTH_KICK, self.SPRITE_HEIGHT_KICK) for i in range(8)]
+        self.kick_frames_left = [frame for frame in self.kick_frames_left if frame is not None]
+        self.kick_frames_right = [frame for frame in self.kick_frames_right if frame is not None]
 
         # Load underkick frames
         self.und_kick_frames_left = [get_frame_Underkick(sprite_sheet9, 0, i, self.SPRITE_WIDTH_UNDERKICK, self.SPRITE_HEIGHT_UNDERKICK) for i in range(8)]
         self.und_kick_frames_right = [get_frame_Underkick(sprite_sheet9, 1, i, self.SPRITE_WIDTH_UNDERKICK, self.SPRITE_HEIGHT_UNDERKICK) for i in range(8)]
+        self.und_kick_frames_left = [frame for frame in self.und_kick_frames_left if frame is not None]
+        self.und_kick_frames_right = [frame for frame in self.und_kick_frames_right if frame is not None]
 
     def update_position(self):
         # Update x position
@@ -99,85 +117,123 @@ class MainCharacter:
     def update_frame(self, target_x):
         # Update frames based on movement
         self.frame_counter += 1
-        if self.is_ducking:  # Ducking
+
+        # Reset frame_index when changing animations
+        if self.is_ducking:
+            if not self.duck_frames_left or not self.duck_frames_right:
+                return
             if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.duck_frames):
-                    self.frame_index = len(self.duck_frames) - 1  # Hold the last frame
-            self.current_frame = self.duck_frames[self.frame_index]
-        elif self.is_getting_up:  # Getting up
+                self.frame_index = (self.frame_index + 1) % len(self.duck_frames_left)
+            if self.x < target_x:
+                self.current_frame = self.duck_frames_left[min(self.frame_index, len(self.duck_frames_left) - 1)]
+            else:
+                self.current_frame = self.duck_frames_right[min(self.frame_index, len(self.duck_frames_right) - 1)]
+        elif self.is_getting_up:
+            if not self.up_frames_left or not self.up_frames_right:
+                return
             if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.up_frames):
-                    self.frame_index = 0
+                self.frame_index = (self.frame_index + 1) % len(self.up_frames_left)
+                if self.frame_index == 0:
                     self.is_getting_up = False  # Stop getting up after one loop
-            self.current_frame = self.up_frames[self.frame_index]
-        elif self.is_jumping_directional:  # Directional Jumping
+            if self.x < target_x:
+                self.current_frame = self.up_frames_left[min(self.frame_index, len(self.up_frames_left) - 1)]
+            else:
+                self.current_frame = self.up_frames_right[min(self.frame_index, len(self.up_frames_right) - 1)]
+        elif self.is_jumping_directional:
+            if not self.jump_right_frames or not self.jump_left_frames:
+                return
             if self.frame_counter % 6 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.jump_right_frames):
-                    self.frame_index = 0
+                self.frame_index = (self.frame_index + 1) % len(self.jump_right_frames)
+                if self.frame_index == 0:
                     self.is_jumping_directional = False  # Stop jumping after one loop
                     self.is_movement_in_progress = False  # Movement loop finished
-            if self.x_change > 0:
-                self.current_frame = self.jump_right_frames[self.frame_index]
-            elif self.x_change < 0:
-                self.current_frame = self.jump_left_frames[self.frame_index]
-        elif self.is_jumping_vertical:  # Vertical Jumping
+            if self.x_change >= 0:
+                self.current_frame = self.jump_right_frames[min(self.frame_index, len(self.jump_right_frames) - 1)]     
+            else:
+                self.current_frame = self.jump_left_frames[min(self.frame_index, len(self.jump_left_frames) - 1)]
+        elif self.is_jumping_vertical:
+            if not self.jump_vertical_frames_left or not self.jump_vertical_frames_right:
+                return
             if self.frame_counter % 12 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.jump_vertical_frames):
-                    self.frame_index = 0
+                self.frame_index = (self.frame_index + 1) % len(self.jump_vertical_frames_left)
+                if self.frame_index == 0:
                     self.is_jumping_vertical = False  # Stop jumping after one loop
                     self.is_movement_in_progress = False  # Movement loop finished
-            self.current_frame = self.jump_vertical_frames[self.frame_index]
-        elif self.is_double_punching:  # Double Punching
+            if self.x < target_x:
+                self.current_frame = self.jump_vertical_frames_left[min(self.frame_index, len(self.jump_vertical_frames_left) - 1)]
+            else:
+                self.current_frame = self.jump_vertical_frames_right[min(self.frame_index, len(self.jump_vertical_frames_right) - 1)]
+        elif self.is_double_punching:
+            if not self.double_punch_frames_left or not self.double_punch_frames_right:
+                return
             if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.double_punch_frames):
-                    self.frame_index = 0
+                self.frame_index = (self.frame_index + 1) % len(self.double_punch_frames_left)
+                if self.frame_index == 0:
                     self.is_double_punching = False  # Stop double punching after one loop
                     self.is_movement_in_progress = False  # Movement loop finished
-            self.current_frame = self.double_punch_frames[self.frame_index]
-        elif self.is_punching:  # Punching
+            if self.x < target_x:
+                self.current_frame = self.double_punch_frames_left[min(self.frame_index, len(self.double_punch_frames_left) - 1)]
+            else:
+                self.current_frame = self.double_punch_frames_right[min(self.frame_index, len(self.double_punch_frames_right) - 1)]
+        elif self.is_punching:
+            if not self.punch_frames_left or not self.punch_frames_right:
+                return
             if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.punch_frames):
-                    self.frame_index = 0
+                self.frame_index = (self.frame_index + 1) % len(self.punch_frames_left)
+                if self.frame_index == 0:
                     self.is_punching = False  # Stop punching after one loop
                     self.is_movement_in_progress = False  # Movement loop finished
-            self.current_frame = self.punch_frames[self.frame_index]
-        elif self.is_kicking:  # Kicking
+            if self.x < target_x:
+                self.current_frame = self.punch_frames_left[min(self.frame_index, len(self.punch_frames_left) - 1)]
+            else:
+                self.current_frame = self.punch_frames_right[min(self.frame_index, len(self.punch_frames_right) - 1)]
+        elif self.is_kicking:
+            if not self.kick_frames_left or not self.kick_frames_right:
+                return
             if self.frame_counter % 5 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.kick_frames):
-                    self.frame_index = 0
+                self.frame_index = (self.frame_index + 1) % len(self.kick_frames_left)
+                if self.frame_index == 0:
                     self.is_kicking = False  # Stop kicking after one loop
                     self.is_movement_in_progress = False  # Movement loop finished
-            self.current_frame = self.kick_frames[self.frame_index]
-        elif self.is_und_kicking:  # Underkicking
+            if self.x < target_x:
+                self.current_frame = self.kick_frames_left[min(self.frame_index, len(self.kick_frames_left) - 1)]
+            else:
+                self.current_frame = self.kick_frames_right[min(self.frame_index, len(self.kick_frames_right) - 1)]
+        elif self.is_und_kicking:
+            if not self.und_kick_frames_left or not self.und_kick_frames_right:
+                return
             if self.frame_counter % 5 == 0:
-                self.frame_index = (self.frame_index + 1)
-                if self.frame_index >= len(self.und_kick_frames_left):
-                    self.frame_index = 0
+                self.frame_index = (self.frame_index + 1) % len(self.und_kick_frames_left)
+                if self.frame_index == 0:
                     self.is_und_kicking = False  # Stop underkicking after one loop
                     self.is_movement_in_progress = False  # Movement loop finished
             if self.x < target_x:
-                self.current_frame = self.und_kick_frames_left[self.frame_index]
+                self.current_frame = self.und_kick_frames_left[min(self.frame_index, len(self.und_kick_frames_left) - 1)]
             else:
-                self.current_frame = self.und_kick_frames_right[self.frame_index]
+                self.current_frame = self.und_kick_frames_right[min(self.frame_index, len(self.und_kick_frames_right) - 1)]
         elif self.x_change > 0:  # Running right
+            if not self.running_frames_right:
+                return
             if self.frame_counter % 7 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.running_frames)
-            self.current_frame = self.running_frames[self.frame_index]
+                self.frame_index = (self.frame_index + 1) % len(self.running_frames_right)
+            self.current_frame = self.running_frames_right[min(self.frame_index, len(self.running_frames_right) - 1)]
         elif self.x_change < 0:  # Running left
+            if not self.running_frames_left:
+                return
             if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index - 1) % len(self.running_frames)
+                self.frame_index = (self.frame_index - 1) % len(self.running_frames_left)
                 if self.frame_index < 0:
-                    self.frame_index = len(self.running_frames) - 1
-            self.current_frame = self.running_frames[self.frame_index]
+                    self.frame_index = len(self.running_frames_left) - 1
+            self.current_frame = self.running_frames_left[min(self.frame_index, len(self.running_frames_left) - 1)]
         else:  # Stance (display the 0th frame)
-            self.current_frame = self.stance_frames[0]
+            if not self.stance_frames_left or not self.stance_frames_right:
+                return
+            if self.frame_counter % 7 == 0:  # Adjust the modulus value to control the speed
+                self.frame_index = (self.frame_index + 1) % len(self.stance_frames_left)
+            if self.x < target_x:
+                self.current_frame = self.stance_frames_left[min(self.frame_index, len(self.stance_frames_left) - 1)]
+            else:
+                self.current_frame = self.stance_frames_right[min(self.frame_index, len(self.stance_frames_right) - 1)]
 
     def draw(self):
         pygame.display.get_surface().blit(self.current_frame, (self.x, self.y))  # Draw the current frame on the screen
