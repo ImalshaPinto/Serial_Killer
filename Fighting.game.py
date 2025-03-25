@@ -1,6 +1,7 @@
 import pygame
 from main_character import MainCharacter  # Import the MainCharacter class
 from vilan import Villain  # Import the Villain class
+from collision_handler import CollisionHandler  # Import the CollisionHandler class
 
 # Initialize pygame
 pygame.init()
@@ -33,6 +34,7 @@ running = True
 clock = pygame.time.Clock()
 player = MainCharacter(370, 350)
 villain = Villain(800, 350)  # Initialize the villain at a different position
+collision_handler = CollisionHandler()  # Initialize the collision handler
 
 # Set a timer event to change behavior every 2 seconds
 pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
@@ -94,11 +96,7 @@ while running:
                 player.frame_index = 0
 
         if event.type == pygame.USEREVENT + 1:
-            villain.random_behavior()
-        
-        if event.type == pygame.USEREVENT + 2:
-            villain.state = "HOLD_FALLING_DOWN"
-            pygame.time.set_timer(pygame.USEREVENT + 2, 0)
+            villain.random_behavior(player.x)
 
     player.update_position()
     player.update_frame(villain.x)
@@ -108,24 +106,8 @@ while running:
     villain.update_frame(player.x)  # Pass the main character's x position to update_frame
     villain.draw(screen)
 
-    # Collision detection
-    if player.is_kicking and player.get_rect().colliderect(villain.get_rect()):
-        if not villain.is_falling_down:  # Check if the villain is already falling down
-            villain.is_falling_down = True
-            villain.is_hit = False  # Reset the hit flag if necessary
-            villain.frame_index = 0
-    if player.is_punching and player.get_rect().colliderect(villain.get_rect()):
-        if not villain.is_hit:  # Check if the villain is already falling down
-            villain.is_hit = True
-            villain.frame_index = 0
-    if player.is_double_punching and player.get_rect().colliderect(villain.get_rect()):
-        if not villain.is_hit:  # Check if the villain is already falling down
-            villain.is_hit = True
-            villain.frame_index = 0
-    if player.is_jumping_vertical and player.get_rect().colliderect(villain.get_rect()):
-        if not villain.is_hit:  # Check if the villain is already falling down
-            villain.is_hit = True
-            villain.frame_index = 0
+    # Handle collisions
+    collision_handler.update(player, villain)
 
     pygame.display.update()
     clock.tick(60)
