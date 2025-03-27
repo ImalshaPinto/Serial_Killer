@@ -76,3 +76,8 @@ class CollisionHandler:
         if villain.is_falling_down:
             # Logic to reset villain state when they get up
             pass
+
+    def is_collision(self, player, villain):
+        player_rect = player.get_rect()
+        villain_rect = villain.get_rect()
+        return player_rect.colliderect(villain_rect)

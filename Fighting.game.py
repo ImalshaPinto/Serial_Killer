@@ -6,7 +6,8 @@ from collision_handler import CollisionHandler  # Import the CollisionHandler cl
 # Initialize pygame
 pygame.init()
 
-# Screen dimensions
+
+# Screen dimensionsa
 screen = pygame.display.set_mode((1250, 700))
 
 # Title and Icon
@@ -28,6 +29,10 @@ sprite_sheet6 = pygame.image.load('Scorpian/Dpunch.png')
 sprite_sheet7 = pygame.image.load('Scorpian/punch.png')
 sprite_sheet8 = pygame.image.load('Scorpian/bBkick.png')
 sprite_sheet9 = pygame.image.load('Scorpian/Undkick.png')
+
+# Load hit and fall animations
+small_hit = pygame.image.load('Scorpian/smallhit.png')
+falling = pygame.image.load('Scorpian/falling1.png')
 
 # Game loop
 running = True
@@ -108,6 +113,13 @@ while running:
 
     # Handle collisions
     collision_handler.update(player, villain)
+
+    # Check for villain attacks and execute animations
+    if collision_handler.is_collision(player, villain):
+        if villain.is_double_punching:
+            player.execute_hit_animation(small_hit, 3, 2)
+        elif villain.is_kicking:
+            player.execute_fall_animation(falling, 7, 2, villain.direction)
 
     pygame.display.update()
     clock.tick(60)

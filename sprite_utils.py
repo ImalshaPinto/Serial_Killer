@@ -3,6 +3,7 @@ import pygame
 def get_frame(sprite_sheet, row, col, width, height):
     """Extract a frame from a sprite sheet."""
     sheet_width, sheet_height = sprite_sheet.get_size()
+    # print(f"Extracting frame at row: {row}, col: {col}, width: {width}, height: {height}")  # Comment out or remove this line
     if col * width + width > sheet_width or row * height + height > sheet_height:
         raise ValueError("Frame dimensions exceed sprite sheet dimensions")
     return sprite_sheet.subsurface(pygame.Rect(col * width, row * height, width, height))
@@ -43,6 +44,11 @@ def get_frame_Kick(sprite_sheet, row, col, width, height):
 def get_frame_Underkick(sprite_sheet, row, col, width, height):
     return get_frame(sprite_sheet, row, col, width, height)
 
+def get_frame_small_hit(sprite_sheet, row, col, width, height):
+    return get_frame(sprite_sheet, row, col, width, height)
+
+def get_frame_falling(sprite_sheet, row, col, width, height):
+    return get_frame(sprite_sheet, row, col, width, height)
 
 ####################################################
 
@@ -66,6 +72,10 @@ def get_frame_GetUp(sprite_sheet, row, col, width, height):
 def get_frame_DoublePunching(sprite_sheet, row, col, width, height):
     return get_frame(sprite_sheet, row, col, width, height)
 
-# Extract frames from punching sprite sheet
+# Extract frames from kick sprite sheet
 def get_frame_kicking(sprite_sheet, row, col, width, height):
     return get_frame(sprite_sheet, row, col, width, height)
+
+#
+
+

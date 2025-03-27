@@ -2,6 +2,14 @@ import pygame
 import random
 from sprite_utils import get_frame_Walking, get_frame_Stance, get_frame_Hit, get_frame_FallingDown, get_frame_GetUp, get_frame_DoublePunching, get_frame_kicking
 
+class BattleState:
+    IDLE = "idle"
+    VILLAIN_ATTACKING = "villain_attacking"
+    CHARACTER_REACTING = "character_reacting"
+    VILLAIN_RECOVERING = "villain_recovering"
+
+game_state = BattleState.IDLE
+
 # Initialize pygame
 pygame.init()
 
@@ -36,6 +44,8 @@ class Villain:
         self.is_double_punching = False  # New state
         self.is_kicking = False  # New state
         self.state = "IDLE"  # FSM State
+        self.direction = "LEFT"  # Initialize direction attribute
+        self.current_action = None  # Flag to get the current action of the villain
         
         # Load walking frames
         self.walking_right = [get_frame_Walking(sprite_sheet, 0, i, self.SPRITE_WIDTH_WALKING, self.SPRITE_HEIGHT_WALKING) for i in range(9)]
@@ -83,8 +93,10 @@ class Villain:
         if self.state == "WALK":
             if self.x < target_x - 10:
                 self.x_change = 1
+                self.direction = "RIGHT"  # Update direction
             elif self.x > target_x + 100:
                 self.x_change = -1
+                self.direction = "LEFT"  # Update direction
             else:
                 self.x_change = 0
             self.x += self.x_change
@@ -150,7 +162,7 @@ class Villain:
 
     def update_frame_double_punching(self, target_x):
         self.frame_counter += 1
-        if self.frame_counter % 6 == 0:
+        if self.frame_counter % 8 == 0:
             self.frame_index = (self.frame_index + 1) % len(self.double_punching_left)
             if self.frame_index == 0:
                 self.is_double_punching = False
@@ -162,7 +174,7 @@ class Villain:
 
     def update_frame_kicking(self, target_x):
         self.frame_counter += 1
-        if self.frame_counter % 6 == 0:
+        if self.frame_counter % 8 == 0:  # Slowed down by increasing the modulus value
             self.frame_index = (self.frame_index + 1) % len(self.kicking_left)
             if self.frame_index == 0:
                 self.is_kicking = False
@@ -207,7 +219,7 @@ class Villain:
     def random_behavior(self, player_x):
         """Randomly switch between states."""
         if abs(self.x - player_x) < 100:  # Check if the player is within range
-            self.state = random.choice(["IDLE", "WALK", "DOUBLE_PUNCHING", "KICKING"])
+            self.state = random.choices(["IDLE", "WALK", "DOUBLE_PUNCHING", "KICKING"], k=1)[0]
             if self.state == "DOUBLE_PUNCHING":
                 self.is_double_punching = True
             elif self.state == "KICKING":
@@ -216,6 +228,9 @@ class Villain:
             self.state = random.choice(["IDLE", "WALK"])
             self.is_double_punching = False
             self.is_kicking = False
+
+    def get_current_action(self):
+        return self.current_action
 
 # Main loop
 def main():
@@ -232,10 +247,27 @@ def main():
             elif event.type == pygame.USEREVENT + 1:
                 villain.random_behavior(player_x)
 
-        villain.update_position(player_x)
-        villain.update_frame(player_x)
+        if game_state == BattleState.VILLAIN_ATTACKING:
+            # Play villain attack animation
+            villain.update_frame(player_x)
+            if villain_attack_done:
+                game_state = BattleState.CHARACTER_REACTING
+
+        elif game_state == BattleState.CHARACTER_REACTING:
+            # Character dodges or takes damage
+            main_character.update_frame(villain.x)
+            if character_react_done:
+                game_state = BattleState.VILLAIN_RECOVERING
+
+        elif game_state == BattleState.VILLAIN_RECOVERING:
+            # Reset villain animation
+            game_state = BattleState.IDLE  # Back to neutral
+
+        main_character.update_position()
+        villain.update_position(main_character.x)
 
         screen.fill((0, 0, 0))
+        main_character.draw()
         villain.draw(screen)
         pygame.display.flip()
         clock.tick(30)
