@@ -6,7 +6,6 @@ from collision_handler import CollisionHandler  # Import the CollisionHandler cl
 # Initialize pygame
 pygame.init()
 
-
 # Screen dimensionsa
 screen = pygame.display.set_mode((1250, 700))
 
@@ -44,6 +43,44 @@ collision_handler = CollisionHandler()  # Initialize the collision handler
 # Set a timer event to change behavior every 2 seconds
 pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
 
+def handle_keydown(event, player, keys, current_time):
+    if not player.is_movement_in_progress:
+        if event.key == pygame.K_LEFT:
+            player.x_change = -3
+        elif event.key == pygame.K_RIGHT:
+            player.x_change = 3
+        elif event.key == pygame.K_DOWN:
+            player.is_ducking = True
+            player.is_getting_up = False
+            player.frame_index = 0
+        elif event.key == pygame.K_UP:
+            player.is_jumping_directional = player.x_change != 0
+            player.is_jumping_vertical = not player.is_jumping_directional
+            player.frame_index = 0
+            player.is_movement_in_progress = True
+        elif event.key == pygame.K_a:
+            if current_time - player.last_a_press_time < 500:
+                player.is_double_punching = True
+            else:
+                player.is_punching = True
+            player.frame_index = 0
+            player.last_a_press_time = current_time
+            player.is_movement_in_progress = True
+        elif event.key == pygame.K_d:
+            if current_time - player.last_down_press_time < 400 and keys[pygame.K_DOWN]:
+                player.is_und_kicking = True
+            else:
+                player.is_kicking = True
+            player.frame_index = 0
+            player.is_movement_in_progress = True
+
+def handle_villain_attack(collision_handler, player, villain, small_hit, falling):
+    if collision_handler.is_collision(player, villain):
+        if villain.is_double_punching:
+            player.execute_hit_animation(small_hit, 3, 2)
+        elif villain.is_kicking:
+            player.execute_fall_animation(falling, 7, 2, villain.direction)
+
 while running:
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
@@ -57,50 +94,16 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if not player.is_movement_in_progress:  # Check if a movement loop is in progress
-                if event.key == pygame.K_LEFT:
-                    player.x_change = -3
-                if event.key == pygame.K_RIGHT:
-                    player.x_change = 3
-                if event.key == pygame.K_DOWN:
-                    player.is_ducking = True
-                    player.is_getting_up = False
-                    player.frame_index = 0
-                if event.key == pygame.K_UP:
-                    if player.x_change != 0:  # Directional jump
-                        player.is_jumping_directional = True
-                    else:  # Vertical jump
-                        player.is_jumping_vertical = True
-                    player.frame_index = 0
-                    player.is_movement_in_progress = True  # Movement loop started
-                if event.key == pygame.K_a:
-                    if current_time - player.last_a_press_time < 500:  # Double press within 500ms
-                        player.is_double_punching = True
-                        player.frame_index = 0
-                    else:
-                        player.is_punching = True
-                        player.frame_index = 0
-                    player.last_a_press_time = current_time
-                    player.is_movement_in_progress = True  # Movement loop started
-                if event.key == pygame.K_d:
-                    if current_time - player.last_down_press_time < 400 and keys[pygame.K_DOWN]:
-                        player.is_und_kicking = True
-                        player.frame_index = 0
-                    else:
-                        player.is_kicking = True
-                        player.frame_index = 0
-                    player.is_movement_in_progress = True  # Movement loop started
-            
-        if event.type == pygame.KEYUP:
+        elif event.type == pygame.KEYDOWN:
+            handle_keydown(event, player, keys, current_time)
+        elif event.type == pygame.KEYUP:
             if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
                 player.x_change = 0
-            if event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN:
                 player.is_ducking = False
                 player.is_getting_up = True
                 player.frame_index = 0
-
-        if event.type == pygame.USEREVENT + 1:
+        elif event.type == pygame.USEREVENT + 1:
             villain.random_behavior(player.x)
 
     player.update_position()
@@ -113,13 +116,7 @@ while running:
 
     # Handle collisions
     collision_handler.update(player, villain)
-
-    # Check for villain attacks and execute animations
-    if collision_handler.is_collision(player, villain):
-        if villain.is_double_punching:
-            player.execute_hit_animation(small_hit, 3, 2)
-        elif villain.is_kicking:
-            player.execute_fall_animation(falling, 7, 2, villain.direction)
+    handle_villain_attack(collision_handler, player, villain, small_hit, falling)
 
     pygame.display.update()
     clock.tick(60)

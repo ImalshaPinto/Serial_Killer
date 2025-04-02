@@ -76,6 +76,4 @@ def get_frame_DoublePunching(sprite_sheet, row, col, width, height):
 def get_frame_kicking(sprite_sheet, row, col, width, height):
     return get_frame(sprite_sheet, row, col, width, height)
 
-#
-
 

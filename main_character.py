@@ -187,138 +187,172 @@ class MainCharacter:
         # Update frames based on movement
         self.frame_counter += 1
 
-        # Reset frame_index when changing animations
         if self.is_ducking:
-            if not self.duck_frames_left or not self.duck_frames_right:
-                return
-            if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.duck_frames_left)
-            if self.x < target_x:
-                self.current_frame = self.duck_frames_left[min(self.frame_index, len(self.duck_frames_left) - 1)]
-            else:
-                self.current_frame = self.duck_frames_right[min(self.frame_index, len(self.duck_frames_right) - 1)]
+            self.update_ducking_frame(target_x)
         elif self.is_getting_up:
-            if not self.up_frames_left or not self.up_frames_right:
-                return
-            if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.up_frames_left)
-                if self.frame_index == 0:
-                    self.is_getting_up = False  # Stop getting up after one loop
-            if self.x < target_x:
-                self.current_frame = self.up_frames_left[min(self.frame_index, len(self.up_frames_left) - 1)]
-            else:
-                self.current_frame = self.up_frames_right[min(self.frame_index, len(self.up_frames_right) - 1)]
+            self.update_getting_up_frame(target_x)
         elif self.is_jumping_directional:
-            if not self.jump_right_frames or not self.jump_left_frames:
-                return
-            if self.frame_counter % 6 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.jump_right_frames)
-                if self.frame_index == 0:
-                    self.is_jumping_directional = False  # Stop jumping after one loop
-                    self.is_movement_in_progress = False  # Movement loop finished
-            if self.x_change >= 0:
-                self.current_frame = self.jump_right_frames[min(self.frame_index, len(self.jump_right_frames) - 1)]
-            else:
-                self.current_frame = self.jump_left_frames[min(self.frame_index, len(self.jump_left_frames) - 1)]
-              # Play jump sound at the start of the jump
-               
+            self.update_jumping_directional_frame()
         elif self.is_jumping_vertical:
-            if not self.jump_vertical_frames_left or not self.jump_vertical_frames_right:
-                return
-            if self.frame_counter % 12 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.jump_vertical_frames_left)
-                if self.frame_index == 0:
-                    self.is_jumping_vertical = False  # Stop jumping after one loop
-                    self.is_movement_in_progress = False  # Movement loop finished
-            if self.x < target_x:
-                self.current_frame = self.jump_vertical_frames_left[min(self.frame_index, len(self.jump_vertical_frames_left) - 1)]
-            else:
-                self.current_frame = self.jump_vertical_frames_right[min(self.frame_index, len(self.jump_vertical_frames_right) - 1)]
-             # Play jump sound at the start of the jump
-               
+            self.update_jumping_vertical_frame(target_x)
         elif self.is_double_punching:
-            if not self.double_punch_frames_left or not self.double_punch_frames_right:
-                return
-            if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.double_punch_frames_left)
-                if self.frame_index == 0:
-                    self.is_double_punching = False  # Stop double punching after one loop
-                    self.is_movement_in_progress = False  # Movement loop finished
-            if self.x < target_x:
-                self.current_frame = self.double_punch_frames_left[min(self.frame_index, len(self.double_punch_frames_left) - 1)]
-            else:
-                self.current_frame = self.double_punch_frames_right[min(self.frame_index, len(self.double_punch_frames_right) - 1)]
+            self.update_double_punching_frame(target_x)
         elif self.is_punching:
-            if not self.punch_frames_left or not self.punch_frames_right:
-                return
-            if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.punch_frames_left)
-                if self.frame_index == 0:
-                    self.is_punching = False  # Stop punching after one loop
-                    self.is_movement_in_progress = False  # Movement loop finished
-            if self.x < target_x:
-                self.current_frame = self.punch_frames_left[min(self.frame_index, len(self.punch_frames_left) - 1)]
-            else:
-                self.current_frame = self.punch_frames_right[min(self.frame_index, len(self.punch_frames_right) - 1)]
+            self.update_punching_frame(target_x)
         elif self.is_kicking:
-            if not self.kick_frames_left or not self.kick_frames_right:
-                return
-            if self.frame_counter % 5 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.kick_frames_left)
-                if self.frame_index == 0:
-                    self.is_kicking = False  # Stop kicking after one loop
-                    self.is_movement_in_progress = False  # Movement loop finished
-            if self.x < target_x:
-                self.current_frame = self.kick_frames_left[min(self.frame_index, len(self.kick_frames_left) - 1)]
-            else:
-                self.current_frame = self.kick_frames_right[min(self.frame_index, len(self.kick_frames_right) - 1)]
+            self.update_kicking_frame(target_x)
         elif self.is_und_kicking:
-            if not self.und_kick_frames_left or not self.und_kick_frames_right:
-                return
-            if self.frame_counter % 5 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.und_kick_frames_left)
-                if self.frame_index == 0:
-                    self.is_und_kicking = False  # Stop underkicking after one loop
-                    self.is_movement_in_progress = False  # Movement loop finished
-            if self.x < target_x:
-                self.current_frame = self.und_kick_frames_left[min(self.frame_index, len(self.und_kick_frames_left) - 1)]
-            else:
-                self.current_frame = self.und_kick_frames_right[min(self.frame_index, len(self.und_kick_frames_right) - 1)]
+            self.update_underkicking_frame(target_x)
         elif self.is_hit:
-            if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.hit_frames)
-                if self.frame_index == 0:
-                    self.is_hit = False  # Stop hit animation after one loop
-            self.current_frame = self.hit_frames[self.frame_index]
+            self.update_hit_frame()
         elif self.is_falling:
-            if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.fall_frames)
-                if self.frame_index == 0:
-                    self.is_falling = False  # Stop fall animation after one loop
-            self.current_frame = self.fall_frames[self.frame_index]
+            self.update_falling_frame()
         elif self.x_change > 0:  # Running right
-            if not self.running_frames_right:
-                return
-            if self.frame_counter % 7 == 0:
-                self.frame_index = (self.frame_index + 1) % len(self.running_frames_right)
-            self.current_frame = self.running_frames_right[min(self.frame_index, len(self.running_frames_right) - 1)]
+            self.update_running_right_frame()
         elif self.x_change < 0:  # Running left
-            if not self.running_frames_left:
-                return
-            if self.frame_counter % 8 == 0:
-                self.frame_index = (self.frame_index - 1) % len(self.running_frames_left)
-                if self.frame_index < 0:
-                    self.frame_index = len(self.running_frames_left) - 1
-            self.current_frame = self.running_frames_left[min(self.frame_index, len(self.running_frames_left) - 1)]
-        else:  # Stance (display the 0th frame)
-            if not self.stance_frames_left or not self.stance_frames_right:
-                return
-            if self.frame_counter % 7 == 0:  # Adjust the modulus value to control the speed
-                self.frame_index = (self.frame_index + 1) % len(self.stance_frames_left)
-            if self.x < target_x:
-                self.current_frame = self.stance_frames_left[min(self.frame_index, len(self.stance_frames_left) - 1)]
-            else:
-                self.current_frame = self.stance_frames_right[min(self.frame_index, len(self.stance_frames_right) - 1)]
+            self.update_running_left_frame()
+        else:  # Stance
+            self.update_stance_frame(target_x)
+
+    def update_ducking_frame(self, target_x):
+        if not self.duck_frames_left or not self.duck_frames_right:
+            return
+        if self.frame_counter % 8 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.duck_frames_left)
+        if self.x < target_x:
+            self.current_frame = self.duck_frames_left[min(self.frame_index, len(self.duck_frames_left) - 1)]
+        else:
+            self.current_frame = self.duck_frames_right[min(self.frame_index, len(self.duck_frames_right) - 1)]
+
+    def update_getting_up_frame(self, target_x):
+        if not self.up_frames_left or not self.up_frames_right:
+            return
+        if self.frame_counter % 8 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.up_frames_left)
+            if self.frame_index == 0:
+                self.is_getting_up = False  # Stop getting up after one loop
+        if self.x < target_x:
+            self.current_frame = self.up_frames_left[min(self.frame_index, len(self.up_frames_left) - 1)]
+        else:
+            self.current_frame = self.up_frames_right[min(self.frame_index, len(self.up_frames_right) - 1)]
+
+    def update_jumping_directional_frame(self):
+        if not self.jump_right_frames or not self.jump_left_frames:
+            return
+        if self.frame_counter % 6 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.jump_right_frames)
+            if self.frame_index == 0:
+                self.is_jumping_directional = False  # Stop jumping after one loop
+                self.is_movement_in_progress = False  # Movement loop finished
+        if self.x_change >= 0:
+            self.current_frame = self.jump_right_frames[min(self.frame_index, len(self.jump_right_frames) - 1)]
+        else:
+            self.current_frame = self.jump_left_frames[min(self.frame_index, len(self.jump_left_frames) - 1)]
+
+    def update_jumping_vertical_frame(self, target_x):
+        if not self.jump_vertical_frames_left or not self.jump_vertical_frames_right:
+            return
+        if self.frame_counter % 12 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.jump_vertical_frames_left)
+            if self.frame_index == 0:
+                self.is_jumping_vertical = False  # Stop jumping after one loop
+                self.is_movement_in_progress = False  # Movement loop finished
+        if self.x < target_x:
+            self.current_frame = self.jump_vertical_frames_left[min(self.frame_index, len(self.jump_vertical_frames_left) - 1)]
+        else:
+            self.current_frame = self.jump_vertical_frames_right[min(self.frame_index, len(self.jump_vertical_frames_right) - 1)]
+
+    def update_double_punching_frame(self, target_x):
+        if not self.double_punch_frames_left or not self.double_punch_frames_right:
+            return
+        if self.frame_counter % 8 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.double_punch_frames_left)
+            if self.frame_index == 0:
+                self.is_double_punching = False  # Stop double punching after one loop
+                self.is_movement_in_progress = False  # Movement loop finished
+        if self.x < target_x:
+            self.current_frame = self.double_punch_frames_left[min(self.frame_index, len(self.double_punch_frames_left) - 1)]
+        else:
+            self.current_frame = self.double_punch_frames_right[min(self.frame_index, len(self.double_punch_frames_right) - 1)]
+
+    def update_punching_frame(self, target_x):
+        if not self.punch_frames_left or not self.punch_frames_right:
+            return
+        if self.frame_counter % 8 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.punch_frames_left)
+            if self.frame_index == 0:
+                self.is_punching = False  # Stop punching after one loop
+                self.is_movement_in_progress = False  # Movement loop finished
+        if self.x < target_x:
+            self.current_frame = self.punch_frames_left[min(self.frame_index, len(self.punch_frames_left) - 1)]
+        else:
+            self.current_frame = self.punch_frames_right[min(self.frame_index, len(self.punch_frames_right) - 1)]
+
+    def update_kicking_frame(self, target_x):
+        if not self.kick_frames_left or not self.kick_frames_right:
+            return
+        if self.frame_counter % 5 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.kick_frames_left)
+            if self.frame_index == 0:
+                self.is_kicking = False  # Stop kicking after one loop
+                self.is_movement_in_progress = False  # Movement loop finished
+        if self.x < target_x:
+            self.current_frame = self.kick_frames_left[min(self.frame_index, len(self.kick_frames_left) - 1)]
+        else:
+            self.current_frame = self.kick_frames_right[min(self.frame_index, len(self.kick_frames_right) - 1)]
+
+    def update_underkicking_frame(self, target_x):
+        if not self.und_kick_frames_left or not self.und_kick_frames_right:
+            return
+        if self.frame_counter % 5 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.und_kick_frames_left)
+            if self.frame_index == 0:
+                self.is_und_kicking = False  # Stop underkicking after one loop
+                self.is_movement_in_progress = False  # Movement loop finished
+        if self.x < target_x:
+            self.current_frame = self.und_kick_frames_left[min(self.frame_index, len(self.und_kick_frames_left) - 1)]
+        else:
+            self.current_frame = self.und_kick_frames_right[min(self.frame_index, len(self.und_kick_frames_right) - 1)]
+
+    def update_hit_frame(self):
+        if self.frame_counter % 8 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.hit_frames)
+            if self.frame_index == 0:
+                self.is_hit = False  # Stop hit animation after one loop
+        self.current_frame = self.hit_frames[self.frame_index]
+
+    def update_falling_frame(self):
+        if self.frame_counter % 8 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.fall_frames)
+            if self.frame_index == 0:
+                self.is_falling = False  # Stop fall animation after one loop
+        self.current_frame = self.fall_frames[self.frame_index]
+
+    def update_running_right_frame(self):
+        if not self.running_frames_right:
+            return
+        if self.frame_counter % 7 == 0:
+            self.frame_index = (self.frame_index + 1) % len(self.running_frames_right)
+        self.current_frame = self.running_frames_right[min(self.frame_index, len(self.running_frames_right) - 1)]
+
+    def update_running_left_frame(self):
+        if not self.running_frames_left:
+            return
+        if self.frame_counter % 8 == 0:
+            self.frame_index = (self.frame_index - 1) % len(self.running_frames_left)
+            if self.frame_index < 0:
+                self.frame_index = len(self.running_frames_left) - 1
+        self.current_frame = self.running_frames_left[min(self.frame_index, len(self.running_frames_left) - 1)]
+
+    def update_stance_frame(self, target_x):
+        if not self.stance_frames_left or not self.stance_frames_right:
+            return
+        if self.frame_counter % 7 == 0:  # Adjust the modulus value to control the speed
+            self.frame_index = (self.frame_index + 1) % len(self.stance_frames_left)
+        if self.x < target_x:
+            self.current_frame = self.stance_frames_left[min(self.frame_index, len(self.stance_frames_left) - 1)]
+        else:
+            self.current_frame = self.stance_frames_right[min(self.frame_index, len(self.stance_frames_right) - 1)]
 
     def draw(self):
         pygame.display.get_surface().blit(self.current_frame, (self.x, self.y))  # Draw the current frame on the screen
