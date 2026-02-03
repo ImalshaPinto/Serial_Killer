@@ -92,17 +92,26 @@ Serial_Killer/
 ## 🎮 Game Features
 
 ### Player Controls
-- **Left/Right Arrows**: Move character
-- **Z**: Punch
-- **X**: Double Punch
-- **C**: Kick
+- **Movement**:
+  - **Left/Right Arrows**: Move character
+  - **UP Arrow**: Jump
+  - **DOWN Arrow**: Crouch
+- **Combat**:
+  - **D Key (Single Press)**: Single Punch (8 damage)
+  - **D Key (Double-Click)**: Double Punch (15 damage)
+  - **C Key**: Kick (20 damage)
+  - **S Key (Hold)**: Block (reduces damage by 2/3)
 
 ### Game Mechanics
-- **Combat System**: Multiple attack types (punch, double punch, kick)
-- **AI Opponent**: Random behavior based on distance to player
-- **Collision Detection**: Attack hit detection with cooldown
+- **Physics System**: Gravity, jumping, and knockback physics
+- **Health System**: 100 HP per character with health bars
+- **Round System**: Best of 3 rounds (90 seconds each)
+- **Combat System**: Multiple attack types with different damage values
+- **AI Opponent**: Intelligent behavior with blocking and counter-attacks
+- **Collision Detection**: Attack hit detection with proper damage and knockback
 - **Animation System**: Smooth sprite animation for all actions
 - **Game States**: Turn-based combat state management
+- **Victory Conditions**: First to win 2 rounds or more health when time expires
 
 ## 🚀 Getting Started
 

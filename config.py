@@ -21,6 +21,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 SPRITES_DIR = os.path.join(ASSETS_DIR, "sprites")
 
+# Background image path
+BACKGROUND_IMAGE = os.path.join(ASSETS_DIR, "palacegrounds.png")
+
 # Character sprite paths
 SCORPION_SPRITES_DIR = os.path.join(SPRITES_DIR, "Scorpian")
 SONYA_SPRITES_DIR = os.path.join(SPRITES_DIR, "sonya")
