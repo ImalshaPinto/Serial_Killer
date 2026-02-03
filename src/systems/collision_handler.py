@@ -33,7 +33,7 @@ class CollisionHandler:
         """
         Handle collision when player is kicking.
         
-        When a kick connects with the villain, they enter the falling state.
+        When a kick connects with the villain, they enter the falling state and take damage.
         
         Args:
             player: The player character entity.
@@ -50,6 +50,12 @@ class CollisionHandler:
                 villain.is_hit = False
                 villain.frame_index = 0
                 self.last_fall_time = pygame.time.get_ticks()
+                
+                # Apply damage and knockback
+                damage = 20  # Kick does more damage
+                knockback = -30 if villain.x > player.x else 30
+                villain.take_damage(damage, knockback)
+                
                 return True
         
         return False
@@ -58,7 +64,7 @@ class CollisionHandler:
         """
         Handle collision when player is punching.
         
-        When a punch connects with the villain, they enter the hit state.
+        When a punch connects with the villain, they enter the hit state and take damage.
         Includes cooldown to prevent multiple hits in quick succession.
         
         Args:
@@ -80,23 +86,71 @@ class CollisionHandler:
                     villain.is_hit = True
                     villain.frame_index = 0
                     self.last_hit_time = current_time
+                    
+                    # Apply damage and knockback
+                    # Double punch does more damage
+                    if hasattr(player, 'is_double_punching') and player.is_double_punching:
+                        damage = 15
+                    else:
+                        damage = 8
+                    
+                    knockback = -15 if villain.x > player.x else 15
+                    villain.take_damage(damage, knockback)
+                    
                     return True
         
         return False
     
     def update(self, player, villain) -> None:
         """
-        Main update method to handle all collision detection.
+        Main update method to handle all collision detection for both characters.
         
         Args:
             player: The player character entity.
             villain: The villain character entity.
         """
-        # First handle kicking collision (higher priority)
+        # Handle player attacking villain
         self.handle_kicking_collision(player, villain)
-        
-        # Then handle punching collision
         self.handle_punching_collision(player, villain)
+        
+        # Handle villain attacking player
+        self.handle_villain_kicking_collision(villain, player)
+        self.handle_villain_punching_collision(villain, player)
+    
+    def handle_villain_kicking_collision(self, villain, player) -> bool:
+        """Handle villain kicking the player."""
+        if (hasattr(villain, 'is_kicking') and villain.is_kicking and 
+            self._rectangles_collide(villain, player)):
+            
+            if not player.is_falling:
+                player.is_falling = True
+                player.is_hit = False
+                player.frame_index = 0
+                
+                # Apply damage and knockback
+                damage = 20
+                knockback = -30 if player.x > villain.x else 30
+                player.take_damage(damage, knockback)
+                
+                return True
+        return False
+    
+    def handle_villain_punching_collision(self, villain, player) -> bool:
+        """Handle villain punching the player."""
+        if (self._is_punching(villain) and 
+            self._rectangles_collide(villain, player)):
+            
+            if not player.is_hit:
+                player.is_hit = True
+                player.frame_index = 0
+                
+                # Apply damage and knockback
+                damage = 12 if (hasattr(villain, 'is_double_punching') and villain.is_double_punching) else 8
+                knockback = -15 if player.x > villain.x else 15
+                player.take_damage(damage, knockback)
+                
+                return True
+        return False
     
     def is_collision(self, player, villain) -> bool:
         """

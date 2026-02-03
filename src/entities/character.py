@@ -44,6 +44,17 @@ class Character(ABC):
         self.y = y
         self.x_change = 0
         
+        # Physics properties
+        self.velocity_y = 0
+        self.gravity = 0.8
+        self.jump_power = -15
+        self.ground_y = y  # Store original ground position
+        self.on_ground = True
+        
+        # Health system
+        self.max_health = 100
+        self.health = 100
+        
         # Animation states
         self.current_frame = None
         self.frame_index = 0
@@ -52,6 +63,9 @@ class Character(ABC):
         # Combat states
         self.is_hit = False
         self.is_falling = False
+        self.is_blocking = False
+        self.is_jumping = False
+        self.is_crouching = False
         
         # Frame collections
         self.stance_frames_left: List[pygame.Surface] = []
@@ -59,12 +73,25 @@ class Character(ABC):
     
     def update_position(self) -> None:
         """
-        Update character position and enforce boundary constraints.
+        Update character position with physics and enforce boundary constraints.
         
         This method should be called each frame to update the character's position
-        and ensure they stay within screen boundaries.
+        with gravity and ensure they stay within screen boundaries.
         """
+        # Apply horizontal movement
         self.x += self.x_change
+        
+        # Apply gravity and vertical movement
+        if not self.on_ground:
+            self.velocity_y += self.gravity
+            self.y += self.velocity_y
+            
+            # Check if landed on ground
+            if self.y >= self.ground_y:
+                self.y = self.ground_y
+                self.velocity_y = 0
+                self.on_ground = True
+                self.is_jumping = False
         
         # Enforce screen boundaries
         self.x = max(self.MIN_X, self.x)
@@ -137,6 +164,37 @@ class Character(ABC):
         """Reset animation to starting frame."""
         self.frame_index = 0
         self.frame_counter = 0
+    
+    def take_damage(self, damage: int, knockback: float = 0) -> None:
+        """
+        Apply damage to the character and optional knockback.
+        
+        Args:
+            damage (int): Amount of health to remove.
+            knockback (float): Horizontal knockback distance.
+        """
+        if not self.is_blocking:
+            self.health = max(0, self.health - damage)
+            if knockback != 0:
+                self.x += knockback
+                # Keep within boundaries
+                self.x = max(self.MIN_X, self.x)
+                if self.MAX_X is not None:
+                    self.x = min(self.MAX_X, self.x)
+        else:
+            # Blocking reduces damage
+            self.health = max(0, self.health - damage // 3)
+    
+    def jump(self) -> None:
+        """Make the character jump."""
+        if self.on_ground and not self.is_crouching:
+            self.velocity_y = self.jump_power
+            self.on_ground = False
+            self.is_jumping = True
+    
+    def is_alive(self) -> bool:
+        """Check if character is still alive."""
+        return self.health > 0
     
     def is_idle(self) -> bool:
         """

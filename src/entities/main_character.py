@@ -31,6 +31,12 @@ class MainCharacter(Character):
     SPRITE_HEIGHT_HIT = 290
     SPRITE_WIDTH_FALL = 183
     SPRITE_HEIGHT_FALL = 290
+    SPRITE_WIDTH_JUMP = 133
+    SPRITE_HEIGHT_JUMP = 290
+    SPRITE_WIDTH_BLOCK = 133
+    SPRITE_HEIGHT_BLOCK = 290
+    SPRITE_WIDTH_CROUCH = 133
+    SPRITE_HEIGHT_CROUCH = 200
     
     def __init__(self, x: float, y: float, sprites_dir: str = "assets/sprites/Scorpian"):
         """
@@ -287,6 +293,24 @@ class MainCharacter(Character):
             self.frame_index = 0
             self.frame_counter = 0
     
+    def block(self) -> None:
+        """Enter blocking stance to reduce incoming damage."""
+        if not self.is_movement_in_progress and self.on_ground:
+            self.is_blocking = True
+    
+    def stop_blocking(self) -> None:
+        """Exit blocking stance."""
+        self.is_blocking = False
+    
+    def crouch(self) -> None:
+        """Enter crouching position."""
+        if not self.is_movement_in_progress and self.on_ground:
+            self.is_crouching = True
+    
+    def stand_up(self) -> None:
+        """Exit crouching position."""
+        self.is_crouching = False
+    
     def get_current_action(self) -> str:
         """
         Get the character's current action.
@@ -294,7 +318,13 @@ class MainCharacter(Character):
         Returns:
             str: Description of current action.
         """
-        if self.is_double_punching:
+        if self.is_blocking:
+            return "blocking"
+        elif self.is_crouching:
+            return "crouching"
+        elif self.is_jumping:
+            return "jumping"
+        elif self.is_double_punching:
             return "double_punching"
         elif self.is_punching:
             return "punching"
